@@ -9,14 +9,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int totalSeconds = 1500;
+  static const twwntyFiveMinutes = 1500;
+  int totalSeconds = twwntyFiveMinutes;
   bool isRunning = false;
+  int totalPomodoros = 0;
   late Timer? timer;
 
   void onTick(Timer timer) {
-    setState(() {
-      totalSeconds--;
-    });
+    if (totalSeconds == 0) {
+      setState(() {
+        totalPomodoros++;
+        isRunning = false;
+        totalSeconds = twwntyFiveMinutes;
+      });
+      timer.cancel();
+    } else {
+      setState(() {
+        totalSeconds--;
+      });
+    }
   }
 
   void onStartPressed() {
@@ -35,6 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
       isRunning = false;
     });
   }
+  // 초(seconds)를 입력받아 MM:SS 포맷의 문자열로 반환하는 함수 추가
+  String format(int seconds) {
+    var duration = Duration(seconds: seconds);
+      // duration.toString()은 "0:25:00.000000" 형태를 반환하므로,
+      // 자르기(substring)를 통해 "25:00" 부분만 추출합니다.
+    return duration.toString().split(".").first.substring(2, 7);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Container(
               alignment: Alignment.bottomCenter,
               child: Text(
-                '$totalSeconds',
+                format(totalSeconds),
                 style: TextStyle(
                   color: Theme.of(context).cardColor,
                   fontSize: 89,
@@ -62,11 +80,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: IconButton(
                 iconSize: 120,
                 color: Theme.of(context).cardColor,
-                onPressed: isRunning ? onPausePressed
-                : onStartPressed,
+                onPressed: isRunning ? onPausePressed : onStartPressed,
                 icon: Icon(isRunning
-                ? Icons.pause_circle_outline
-                : Icons.play_circle_outline),
+                    ? Icons.pause_circle_outline
+                    : Icons.play_circle_outline),
               ),
             ),
           ),
@@ -93,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         Text(
-                          '0',
+                          '$totalPomodoros',
                           style: TextStyle(
                             fontSize: 58,
                             fontWeight: FontWeight.w600,
